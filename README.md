@@ -1,0 +1,3 @@
+# template-replace README
+
+**Enjoy!**

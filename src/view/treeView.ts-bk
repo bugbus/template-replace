@@ -1,0 +1,85 @@
+import * as vscode from 'vscode';
+import * as path from 'path';
+import * as fs from 'fs';
+
+class TsextualSubstitution implements vscode.TreeDataProvider<Dependency> {
+	private _onDidChangeTreeData: vscode.EventEmitter<Dependency | undefined | void> = new vscode.EventEmitter<Dependency | undefined | void>();
+	readonly onDidChangeTreeData: vscode.Event<Dependency | undefined | void> = this._onDidChangeTreeData.event;
+
+	constructor() {
+    }
+    refresh(): void {
+		this._onDidChangeTreeData.fire();
+	}
+
+	getTreeItem(element: Dependency): vscode.TreeItem {
+		return element;
+	}
+
+	getChildren(element?: Dependency): Thenable<Dependency[]> {
+		if(element){
+			const packageJsonPath = '/Users/wangzelin/WorkSpace/vsCode/write/write/c.json';
+			return Promise.resolve(this.getDepsInPackageJson(packageJsonPath));
+		}else{
+			const packageJsonPath = '/Users/wangzelin/WorkSpace/vsCode/write/write/c.json';
+			return Promise.resolve(this.getDepsInPackageJson(packageJsonPath));
+		}
+    }
+
+	private getDepsInPackageJson(savePath: string): Dependency[] {
+
+		// fs.readdir(savePath)
+		// const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'));
+
+		const toDep = (description: string): Dependency => {
+			console.log('moduleName: ' + description);
+			return new Dependency(
+				description, 
+				vscode.TreeItemCollapsibleState.None, 
+				{
+					command: 'extension.openPackageOnNpm',
+					title: '',
+					arguments: [description]
+				}
+			);
+		};
+
+		// if (this.pathExists(packageJsonPath)) {
+		// 	return Object.keys(packageJson.Printtoconsole).map(pri=>toDep(packageJson.Printtoconsole[pri]));
+		// }else {
+		// 	return [];
+		// }
+	}
+	private pathExists(p: string): boolean {
+		try {
+			fs.accessSync(p);
+		} catch (err) {
+			return false;
+		}
+
+		return true;
+	}
+
+}
+
+
+
+export class Dependency extends vscode.TreeItem {
+
+	constructor(
+		public readonly label: string,
+		public readonly collapsibleState: vscode.TreeItemCollapsibleState,
+		public readonly command?: vscode.Command
+	) {
+		super(label, collapsibleState);
+	}
+
+	// iconPath = {
+	// 	light: path.join(__filename, '..', '..', 'resources', 'light', 'dependency.svg'),
+	// 	dark: path.join(__filename, '..', '..', 'resources', 'dark', 'dependency.svg')
+	// };
+
+	contextValue = 'dependency';
+}
+
+export default TsextualSubstitution;
