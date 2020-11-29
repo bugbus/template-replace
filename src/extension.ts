@@ -11,19 +11,22 @@ export function activate(context: vscode.ExtensionContext) {
 
 	const fileExplorer = new FileExplorer(context);
 	fileExplorer.createTreeView();
+	vscode.commands.registerCommand('extension.helloWorld', (resource) => {
+		vscode.window.showInformationMessage("helloWorld");
+	});
 	// vscode.window.registerTreeDataProvider("");
 	// vscode.commands.registerCommand('fileExplorer', () => {
 	// 	fileExplorer.createTreeView();
 	// });
 
 	vscode.commands.registerCommand('fileExplorer.openFile', (resource) => {
-		fileExplorer.openResource(resource)
+		fileExplorer.openResource(resource);
 	});
 
 	const fileSystemProvider = new FileSystemProvider();
 	vscode.commands.registerCommand('fileExplorer.refreshEntry', (resource) => {
 		// vscode.window.showInformationMessage("R");
-		fileExplorer.refresh()
+		fileExplorer.refresh();
 	});
 	// vscode.commands.registerCommand('fileExplorer.addEntry',
 	// (resource) => {

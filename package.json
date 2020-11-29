@@ -11,7 +11,7 @@
 		"Other"
 	],
 	"activationEvents": [
-		"*"
+		"onView:fileExplorer"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
