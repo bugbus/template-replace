@@ -15,7 +15,7 @@ public {r1c1} get{r1c2}(){
     return this.{r1c2};
 } 
 ```
-![1](./assets/1.png)
+
   
 ### 另一个文件像这样：
   
@@ -26,11 +26,11 @@ String	fun1
 int	fun2
 ```
 中间用[\t]制表符分割。
-![2](./assets/2.png)
+
 
 
 点击’=>'后就生成了  （将鼠标放到模版文件上就能看到‘=>’了）
-![4](./assets/4.png)
+
 ```
 public String getfun1(){
     return this.fun1;
@@ -40,7 +40,7 @@ public int getfun2(){
 } 
 
 ```
-![3](./assets/3.png)
+
 
 {r1c1}  
 r是行，c是列的意思。r1c1是第一行第一列的那个字符串，用[\t]制表符分割  
