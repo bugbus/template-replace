@@ -15,6 +15,19 @@
 	],
 	"main": "./out/extension.js",
 	"contributes": {
+		"configuration": [
+			{
+				"title": "replace",
+				"properties": {
+					"conf.replace.workSpacePath": {
+						"type": "string",
+						"default": "explorer",
+						"description": "工作区域路径",
+						"scope": "window"
+					}
+				}
+			}
+		],
 		"commands": [
 			{
 				"command": "extension.helloWorld",
@@ -35,14 +48,6 @@
 			{
 				"command": "fileExplorer.refreshEntry",
 				"title": "R"
-			},
-			{
-				"command": "fileExplorer.addEntry",
-				"title": "+"
-			},
-			{
-				"command": "fileExplorer.deleteEntry",
-				"title": "Delete"
 			}
 		],
 		"views": {
@@ -63,11 +68,6 @@
 					"command": "fileExplorer.refreshEntry",
 					"when": "view == fileExplorer",
 					"group": "navigation"
-				},
-				{
-					"command": "fileExplorer.addEntry",
-					"when": "view == fileExplorer",
-					"group": "navigation"
 				}
 			],
 			"view/item/context": [
@@ -75,10 +75,6 @@
 					"command": "fileExplorer.replace",
 					"when": "view == fileExplorer && viewItem == file",
 					"group": "inline"
-				},
-				{
-					"command": "fileExplorer.deleteEntry",
-					"when": "view == fileExplorer && viewItem == file"
 				}
 			]
 		}
