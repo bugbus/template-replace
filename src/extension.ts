@@ -22,7 +22,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 	const fileSystemProvider = new FileSystemProvider();
 	vscode.commands.registerCommand('fileExplorer.refreshEntry', (resource) => {
-		vscode.window.showInformationMessage("R");
+		// vscode.window.showInformationMessage("R");
 		fileExplorer.refresh()
 	});
 	// vscode.commands.registerCommand('fileExplorer.addEntry',
@@ -50,6 +50,12 @@ export function activate(context: vscode.ExtensionContext) {
 		  vscode.workspace.getConfiguration().update('conf.replace.workSpacePath', folderUris[0].path, vscode.ConfigurationTarget.Global);
 		});
 	  });
+
+	  context.subscriptions.push(vscode.workspace.onDidChangeConfiguration(e => {
+		if (e.affectsConfiguration('conf.replace.workSpacePath')) {
+			fileExplorer.createTreeView();
+		}
+	  }));
 	
 	//
 	let disposable = vscode.commands.registerCommand('fileExplorer.replace', async (node:Entry) => {
