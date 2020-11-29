@@ -1,4 +1,10 @@
 # template-replace README
+# 声明
+# 不知道那写错了，用不了，明天还要上边那～～
+
+# 塑料英语😊
+# I don't know something wrong i did, it's not going to work,
+# i well going to be done tomorrow...or Day after tomorrow.
 
 ## 功能简介：
 这个插件是替换模版文件中的变量，多行对多行。对于我来说就是替换老长老长结构文件的。。。   
