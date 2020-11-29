@@ -1,4 +1,4 @@
-import{IdentifierSite} from '../core/IdentifierSite'
+import{IdentifierSite} from '../core/IdentifierSite';
 
 class ReplaceText{
     private data:[] = [];

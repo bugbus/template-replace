@@ -62,7 +62,7 @@ namespace _ {
 		});
     }
     
-    export function readdir_regular(path: string, regular: string): Promise<string[]> {
+    export function readdirRegular(path: string, regular: string): Promise<string[]> {
 		return new Promise<string[]>((resolve, reject) => {
             if(path.match(regular)){
                 return fs.readdir(path, (error, children) => handleResult(resolve, reject, error, normalizeNFC(children)));

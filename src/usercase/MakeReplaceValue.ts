@@ -1,8 +1,8 @@
 import * as fs from 'fs';
 import { workerData } from 'worker_threads';
 
-import{Entry} from '../core/Entry'
-import{IdentifierSite} from '../core/IdentifierSite'
+import{Entry} from '../core/Entry';
+import{IdentifierSite} from '../core/IdentifierSite';
 
 class MakeReplaceValue{
   private identifierMaxRow:number = 1;
@@ -70,11 +70,11 @@ class MakeReplaceValue{
   private readVariable(word:string){
     const rCol = /(?:\r|\n|\r\n|\n\r)/g;
     word.split(rCol).forEach((str)=>{
-      if(str=="")return;
+      if(str===""){return;}
       const rRow = /(?:\t)/g;
       var vartemp:Array<string> = new Array();
       str.split(rRow).forEach((varitem)=>{
-        if(varitem=="")return;
+        if(varitem===""){return;}
         vartemp.push(varitem);
       });
       this.variable.push(vartemp);
@@ -84,12 +84,12 @@ class MakeReplaceValue{
 
   public groupingVariable():any{
     var replaceData=[];
-    var groupingNum = this.identifierMaxRow==0?(this.variableMaxRow/this.identifierMaxRow):1;
+    var groupingNum = this.identifierMaxRow===0?(this.variableMaxRow/this.identifierMaxRow):1;
     for(var i=0;i<this.variableMaxRow; i+=this.identifierMaxRow){
       replaceData.push(this.variable.slice(i,i+this.identifierMaxRow));
     }
-    return replaceData
+    return replaceData;
   }
 }
 
-export default MakeReplaceValue
+export default MakeReplaceValue;

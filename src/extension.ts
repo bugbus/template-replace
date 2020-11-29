@@ -1,9 +1,9 @@
 import * as vscode from 'vscode';
-import {FileExplorer} from './usercase/fileExplorer'
-import {FileSystemProvider} from './usercase/fileExplorer'
-import {Entry} from './core/Entry'
-import MakeReplaceValue from './usercase/MakeReplaceValue'
-import ReplaceText from './usercase/ReplaceText'
+import {FileExplorer} from './usercase/fileExplorer';
+import {FileSystemProvider} from './usercase/fileExplorer';
+import {Entry} from './core/Entry';
+import MakeReplaceValue from './usercase/MakeReplaceValue';
+import ReplaceText from './usercase/ReplaceText';
 import { TextDecoder } from 'util';
 
 export function activate(context: vscode.ExtensionContext) {
@@ -63,7 +63,7 @@ export function activate(context: vscode.ExtensionContext) {
 	//
 	let disposable = vscode.commands.registerCommand('fileExplorer.replace', async (node:Entry) => {
     let editor = vscode.window.activeTextEditor;
-    if (!editor) {return null}
+    if (!editor) {return null;}
     const document = editor.document;
 
     const documentName = document.fileName;
