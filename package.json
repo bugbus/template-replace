@@ -2,7 +2,7 @@
 	"name": "template-replace",
 	"displayName": "template replace",
 	"description": "替换模版文件中的固定字符串",
-	"version": "0.4.3",
+	"version": "0.4.4",
 	"publisher": "wangzelin",
 	"engines": {
 		"vscode": "^1.51.0"
