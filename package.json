@@ -11,7 +11,7 @@
 		"Other"
 	],
 	"activationEvents": [
-		"onCommand:extension.helloWorld"
+		"onView:fileExplorer"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
@@ -31,9 +31,20 @@
 			{
 				"command": "config.setWorkSpacePath",
 				"title": "修改工作区域路径"
+			},
+			{
+				"command": "fileExplorer.refreshEntry",
+				"title": "R"
+			},
+			{
+				"command": "fileExplorer.addEntry",
+				"title": "+"
+			},
+			{
+				"command": "fileExplorer.deleteEntry",
+				"title": "Delete"
 			}
 		],
-
 		"views": {
 			"explorer": [
 				{
@@ -47,6 +58,16 @@
 				{
 					"command": "config.setWorkSpacePath",
 					"when": "view == fileExplorer"
+				},
+				{
+					"command": "fileExplorer.refreshEntry",
+					"when": "view == fileExplorer",
+					"group": "navigation"
+				},
+				{
+					"command": "fileExplorer.addEntry",
+					"when": "view == fileExplorer",
+					"group": "navigation"
 				}
 			],
 			"view/item/context": [
@@ -54,6 +75,10 @@
 					"command": "fileExplorer.replace",
 					"when": "view == fileExplorer && viewItem == file",
 					"group": "inline"
+				},
+				{
+					"command": "fileExplorer.deleteEntry",
+					"when": "view == fileExplorer && viewItem == file"
 				}
 			]
 		}
@@ -78,5 +103,9 @@
 		"mocha": "^8.1.3",
 		"typescript": "^4.0.2",
 		"vscode-test": "^1.4.0"
+	},
+	"dependencies": {
+		"@types/mkdirp": "^1.0.1",
+		"@types/rimraf": "^3.0.0"
 	}
 }

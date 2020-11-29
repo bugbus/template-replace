@@ -1,6 +1,8 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
+import * as mkdirp from 'mkdirp';
+import * as rimraf from 'rimraf';
 
 //#region Utilities
 
@@ -98,14 +100,14 @@ namespace _ {
 
 	export function rmrf(path: string): Promise<void> {
 		return new Promise<void>((resolve, reject) => {
-			//rimraf(path, error => handleResult(resolve, reject, error, void 0));
+			rimraf(path, error => handleResult(resolve, reject, error, void 0));
 		});
 	}
 
 	export function mkdir(path: string): Promise<void> {
 		return new Promise<void>((resolve, reject) => {
 			
-			// mkdirp(path, error => handleResult(resolve, reject, error, void 0));
+			mkdirp(path);
 		});
 	}
 
@@ -165,12 +167,17 @@ interface Entry {
 export class FileSystemProvider implements vscode.TreeDataProvider<Entry>, vscode.FileSystemProvider {
 
 	private _onDidChangeFile: vscode.EventEmitter<vscode.FileChangeEvent[]>;
-	// private _onDidChangeTreeData: vscode.EventEmitter<any> = new vscode.EventEmitter<any>();
-	// readonly onDidChangeTreeData: vscode.Event<any> = this._onDidChangeTreeData.event;
-	private _workSpacePath:string;
 
-	constructor(_workSpacePath:string) {
+	private _onDidChangeTreeData: vscode.EventEmitter<any|undefined> = new vscode.EventEmitter<any|undefined>();
+	readonly onDidChangeTreeData: vscode.Event<any|undefined> = this._onDidChangeTreeData.event;
+
+	private _workSpacePath:string = "";
+
+	constructor() {
 		this._onDidChangeFile = new vscode.EventEmitter<vscode.FileChangeEvent[]>();
+		
+	}
+	public setWorkSpacePath(_workSpacePath:string){
 		this._workSpacePath = _workSpacePath;
 	}
 
@@ -179,8 +186,13 @@ export class FileSystemProvider implements vscode.TreeDataProvider<Entry>, vscod
 	}
 
 	public refresh(): any {
-		this._onDidChangeFile.fire([{} as vscode.FileChangeEvent]);
+		this._onDidChangeTreeData.fire(undefined);
 	}
+
+	// watch(uri: vscode.Uri, options: { recursive: boolean; excludes: string[]; }): vscode.Disposable {
+    //     // ignore, fires for all changes...
+    //     return new vscode.Disposable(() => { });
+	// }
 
 	watch(uri: vscode.Uri, options: { recursive: boolean; excludes: string[]; }): vscode.Disposable {
 		const watcher = fs.watch(uri.fsPath, { recursive: options.recursive }, async (event: string, filename: string | Buffer) => {
@@ -218,6 +230,7 @@ export class FileSystemProvider implements vscode.TreeDataProvider<Entry>, vscod
 		for (let i = 0; i < children.length; i++) {
 			const child = children[i];
 			const stat = await this._stat(path.join(uri.fsPath, child));
+			//const stat = await this.stat(path.join(uri.fsPath, child))
 			result.push([child, stat.type]);
 		}
 
@@ -319,17 +332,30 @@ export class FileSystemProvider implements vscode.TreeDataProvider<Entry>, vscod
 }
 
 export class FileExplorer {
-	private fileExplorer: vscode.TreeView<Entry>;
+	private fileExplorer?: vscode.TreeView<Entry>;
+	private configuredView:any;
+	private treeDataProvider?:FileSystemProvider;
 	constructor(context: vscode.ExtensionContext) {
-		const configuredView:any = vscode.workspace.getConfiguration().get('conf.replace.workSpacePath');
-		// const configuredView:any = "explorer";
-		const treeDataProvider = new FileSystemProvider(configuredView);
-		this.fileExplorer = vscode.window.createTreeView('fileExplorer', { treeDataProvider });
-		vscode.commands.registerCommand('fileExplorer.openFile', (resource) => this.openResource(resource));
-		vscode.commands.registerCommand('fileExplorer.refresh', () => treeDataProvider.refresh());
 	}
 
-	private openResource(resource: vscode.Uri): void {
+	public createTreeView(){
+		this.configuredView = vscode.workspace.getConfiguration().get('conf.replace.workSpacePath');
+		// const configuredView:any = "explorer";
+		this.treeDataProvider = new FileSystemProvider();
+		this.treeDataProvider.setWorkSpacePath(this.configuredView);
+		// treeDataProvider.watch(vscode.Uri.parse(configuredView),{recursive: true, excludes: []} );
+
+		this.fileExplorer = vscode.window.createTreeView('fileExplorer', { treeDataProvider:this.treeDataProvider });
+	}
+
+	public getConfiguredView(){
+		return this.configuredView;
+	}
+	public refresh(){
+		this.treeDataProvider?.refresh();
+	}
+
+	public openResource(resource: vscode.Uri): void {
 		vscode.window.showTextDocument(resource);
 	}
 }
