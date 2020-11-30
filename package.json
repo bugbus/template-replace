@@ -2,7 +2,7 @@
 	"name": "template-replace",
 	"displayName": "template replace",
 	"description": "替换模版文件中的固定字符串",
-	"version": "0.4.5",
+	"version": "0.4.6",
 	"publisher": "wangzelin",
 	"engines": {
 		"vscode": "^1.51.0"
@@ -115,7 +115,7 @@
 	},
 	"license": "SEE LICENSE IN LICENSE.txt",
 	"repository": {
-        "type": "git",
-        "url": "https://github.com/bugbus/template-replace.git"
-    }
+		"type": "git",
+		"url": "https://github.com/bugbus/template-replace.git"
+	}
 }
