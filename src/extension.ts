@@ -7,13 +7,13 @@ import ReplaceText from './usercase/ReplaceText';
 import { TextDecoder } from 'util';
 
 export function activate(context: vscode.ExtensionContext) {
-	console.log('Congratulations, your extension "templatereplace" is now active!');
+	// console.log('Congratulations, your extension "templatereplace" is now active!');
 
 	const fileExplorer = new FileExplorer(context);
 	fileExplorer.createTreeView();
-	vscode.commands.registerCommand('extension.helloWorld', (resource) => {
-		vscode.window.showInformationMessage("helloWorld");
-	});
+	// vscode.commands.registerCommand('extension.helloWorld', (resource) => {
+	// 	vscode.window.showInformationMessage("helloWorld");
+	// });
 	// vscode.window.registerTreeDataProvider("");
 	// vscode.commands.registerCommand('fileExplorer', () => {
 	// 	fileExplorer.createTreeView();

@@ -1,6 +1,6 @@
 # Change Log
 
-All notable changes to the "template-replace" extension will be documented in this file.
+## [0.4.6] - 2020-11-30
 
 ## [Unreleased]
 

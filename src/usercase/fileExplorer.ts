@@ -305,9 +305,9 @@ export class FileSystemProvider implements vscode.TreeDataProvider<Entry>, vscod
 			return children.map(([name, type]) => ({ uri: vscode.Uri.file(path.join(element.uri.fsPath, name)), type }));
 		}
 		//第一次的时候，打开既定的一个路径为workSpace
-        const workspaceFolder = vscode.workspace.workspaceFolders?.filter(folder => folder.uri.scheme === 'file')[0];
-		if (workspaceFolder) {			
-			const workPath:vscode.Uri = this._workSpacePath==='explorer'?workspaceFolder.uri:vscode.Uri.parse(this._workSpacePath);
+        // const workspaceFolder = vscode.workspace.workspaceFolders?.filter(folder => folder.uri.scheme === 'file')[0];
+		if (this._workSpacePath!=="explorer") {			
+			const workPath:vscode.Uri = vscode.Uri.parse(this._workSpacePath);
 			const children = await this.readDirectory(workPath);
 			children.sort((a, b) => {
 				if (a[1] === b[1]) {
@@ -315,7 +315,7 @@ export class FileSystemProvider implements vscode.TreeDataProvider<Entry>, vscod
 				}
 				return a[1] === vscode.FileType.Directory ? -1 : 1;
 			});
-			return children.map(([name, type]) => ({ uri: vscode.Uri.file(path.join(workspaceFolder.uri.fsPath, name)), type }));
+			return children.map(([name, type]) => ({ uri: vscode.Uri.file(path.join(workPath.path, name)), type }));
 		}
 
 		return [];

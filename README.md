@@ -1,10 +1,4 @@
 # template-replace README
-# 声明
-# 不知道那写错了，用不了，明天还要上边那～～
-
-# 塑料英语😊
-# I don't know something wrong i did, it's not going to work,
-# i well going to be done tomorrow...or Day after tomorrow.
 
 ## 功能简介：
 这个插件是替换模版文件中的变量，多行对多行。对于我来说就是替换老长老长结构文件的。。。   
@@ -69,7 +63,5 @@ r1c2,r2c2...等等。
 并且这个插件使用频率和主要解决的问题，与文件操作依赖性不强。  
 
 所以最后去掉了，虽然少了一些体验，所以也在考虑，以后加上。  
-
-项目地址：https://github.com/bugbus/template-replace
 
 **Enjoy!**
