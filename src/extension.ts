@@ -26,8 +26,17 @@ export function activate(context: vscode.ExtensionContext) {
 	const fileSystemProvider = new FileSystemProvider();
 	vscode.commands.registerCommand('fileExplorer.refreshEntry', (resource) => {
 		// vscode.window.showInformationMessage("R");
+		fileExplorer.getOnDidChangeFile();
 		fileExplorer.refresh();
 	});
+	context.subscriptions.push(fileSystemProvider.onDidChangeFile(e=>{
+		vscode.window.showInformationMessage("R");
+	}))
+	// vscode.commands.registerCommand('fileExplorer.refreshEntry', (resource) => {
+	// 	// vscode.window.showInformationMessage("R");
+	// 	fileExplorer.refresh();
+	// });
+	
 	// vscode.commands.registerCommand('fileExplorer.addEntry',
 	// (resource) => {
 	// 	vscode.window.showInformationMessage(resource);

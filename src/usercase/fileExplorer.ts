@@ -166,7 +166,9 @@ interface Entry {
 
 export class FileSystemProvider implements vscode.TreeDataProvider<Entry>, vscode.FileSystemProvider {
 
-	private _onDidChangeFile: vscode.EventEmitter<vscode.FileChangeEvent[]>;
+	// private _onDidChangeFile: vscode.EventEmitter<vscode.FileChangeEvent[]>();
+	public _onDidChangeFile = new vscode.EventEmitter<vscode.FileChangeEvent[]>();
+	readonly onDidChangeFile: vscode.Event<vscode.FileChangeEvent[]> = this._onDidChangeFile.event;
 
 	private _onDidChangeTreeData: vscode.EventEmitter<any|undefined> = new vscode.EventEmitter<any|undefined>();
 	readonly onDidChangeTreeData: vscode.Event<any|undefined> = this._onDidChangeTreeData.event;
@@ -181,9 +183,9 @@ export class FileSystemProvider implements vscode.TreeDataProvider<Entry>, vscod
 		this._workSpacePath = _workSpacePath;
 	}
 
-	get onDidChangeFile(): vscode.Event<vscode.FileChangeEvent[]> {
-		return this._onDidChangeFile.event;
-	}
+	// get onDidChangeFile(): vscode.Event<vscode.FileChangeEvent[]> {
+	// 	return this._onDidChangeFile.fire;
+	// }
 
 	public refresh(): any {
 		this._onDidChangeTreeData.fire(undefined);
@@ -201,6 +203,7 @@ export class FileSystemProvider implements vscode.TreeDataProvider<Entry>, vscod
 			// TODO support excludes (using minimatch library?)
 
 			this._onDidChangeFile.fire([{
+
 				type: event === 'change' ? vscode.FileChangeType.Changed : await _.exists(filepath) ? vscode.FileChangeType.Created : vscode.FileChangeType.Deleted,
 				uri: uri.with({ path: filepath })
 			} as vscode.FileChangeEvent]);
@@ -343,7 +346,7 @@ export class FileExplorer {
 		// const configuredView:any = "explorer";
 		this.treeDataProvider = new FileSystemProvider();
 		this.treeDataProvider.setWorkSpacePath(this.configuredView);
-		// treeDataProvider.watch(vscode.Uri.parse(configuredView),{recursive: true, excludes: []} );
+		this.treeDataProvider.watch(vscode.Uri.parse(this.configuredView),{recursive: true, excludes: []} );
 
 		this.fileExplorer = vscode.window.createTreeView('fileExplorer', { treeDataProvider:this.treeDataProvider });
 	}
@@ -351,6 +354,11 @@ export class FileExplorer {
 	public getConfiguredView(){
 		return this.configuredView;
 	}
+
+	public getOnDidChangeFile(){
+		return this.treeDataProvider?._onDidChangeFile.fire;
+	}
+
 	public refresh(){
 		this.treeDataProvider?.refresh();
 	}
