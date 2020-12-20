@@ -34,16 +34,16 @@
 				"title": "Open File"
 			},
 			{
+				"command": "fileExplorer.openFloder",
+				"title": "Open File"
+			},
+			{
 				"command": "fileExplorer.replace",
 				"title": "=>"
 			},
 			{
 				"command": "config.setWorkSpacePath",
 				"title": "修改工作区域路径"
-			},
-			{
-				"command": "fileExplorer.refreshEntry",
-				"title": "R"
 			}
 		],
 		"views": {
@@ -59,11 +59,6 @@
 				{
 					"command": "config.setWorkSpacePath",
 					"when": "view == fileExplorer"
-				},
-				{
-					"command": "fileExplorer.refreshEntry",
-					"when": "view == fileExplorer",
-					"group": "navigation"
 				}
 			],
 			"view/item/context": [
@@ -71,6 +66,10 @@
 					"command": "fileExplorer.replace",
 					"when": "view == fileExplorer && viewItem == file",
 					"group": "inline"
+				},
+				{
+					"command": "fileExplorer.openFloder",
+					"when": "view == fileExplorer && viewItem == file"
 				}
 			]
 		}

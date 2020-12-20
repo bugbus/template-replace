@@ -111,6 +111,12 @@ namespace _ {
 		});
 	}
 
+	export function openDir(path: string): Promise<void> {
+		return new Promise<void>((resolve, reject) => {
+			fs.opendir('/Users/wangzelin/WorkSpace/vsCode/test2',error => handleResult(resolve, reject, error, void 0));
+		});
+	}
+
 	export function rename(oldPath: string, newPath: string): Promise<void> {
 		return new Promise<void>((resolve, reject) => {
 			fs.rename(oldPath, newPath, error => handleResult(resolve, reject, error, void 0));
@@ -166,9 +172,9 @@ interface Entry {
 
 export class FileSystemProvider implements vscode.TreeDataProvider<Entry>, vscode.FileSystemProvider {
 
-	// private _onDidChangeFile: vscode.EventEmitter<vscode.FileChangeEvent[]>();
-	public _onDidChangeFile = new vscode.EventEmitter<vscode.FileChangeEvent[]>();
-	readonly onDidChangeFile: vscode.Event<vscode.FileChangeEvent[]> = this._onDidChangeFile.event;
+	// private _onDidChangeFile: vscode.EventEmitter<vscode.FileChangeEvent[]>;
+	public _onDidChangeFile: vscode.EventEmitter<vscode.FileChangeEvent[]> = new vscode.EventEmitter<vscode.FileChangeEvent[]>();
+	readonly onDidChangeFile: vscode.Event<vscode.FileChangeEvent[]>= this._onDidChangeFile.event;
 
 	private _onDidChangeTreeData: vscode.EventEmitter<any|undefined> = new vscode.EventEmitter<any|undefined>();
 	readonly onDidChangeTreeData: vscode.Event<any|undefined> = this._onDidChangeTreeData.event;
@@ -176,40 +182,23 @@ export class FileSystemProvider implements vscode.TreeDataProvider<Entry>, vscod
 	private _workSpacePath:string = "";
 
 	constructor() {
-		this._onDidChangeFile = new vscode.EventEmitter<vscode.FileChangeEvent[]>();
-		
 	}
 	public setWorkSpacePath(_workSpacePath:string){
 		this._workSpacePath = _workSpacePath;
 	}
 
-	// get onDidChangeFile(): vscode.Event<vscode.FileChangeEvent[]> {
-	// 	return this._onDidChangeFile.fire;
-	// }
-
 	public refresh(): any {
 		this._onDidChangeTreeData.fire(undefined);
 	}
 
-	// watch(uri: vscode.Uri, options: { recursive: boolean; excludes: string[]; }): vscode.Disposable {
-    //     // ignore, fires for all changes...
-    //     return new vscode.Disposable(() => { });
-	// }
-
 	watch(uri: vscode.Uri, options: { recursive: boolean; excludes: string[]; }): vscode.Disposable {
 		const watcher = fs.watch(uri.fsPath, { recursive: options.recursive }, async (event: string, filename: string | Buffer) => {
 			const filepath = path.join(uri.fsPath, _.normalizeNFC(filename.toString()));
-
-			// TODO support excludes (using minimatch library?)
-
-			this._onDidChangeFile.fire([{
-
-				type: event === 'change' ? vscode.FileChangeType.Changed : await _.exists(filepath) ? vscode.FileChangeType.Created : vscode.FileChangeType.Deleted,
-				uri: uri.with({ path: filepath })
-			} as vscode.FileChangeEvent]);
+			this._onDidChangeTreeData.fire(undefined);
 		});
 
 		return { dispose: () => watcher.close() };
+		// return new vscode.Disposable(() => { });
 	}
 
 	stat(uri: vscode.Uri): vscode.FileStat | Thenable<vscode.FileStat> {
@@ -241,7 +230,16 @@ export class FileSystemProvider implements vscode.TreeDataProvider<Entry>, vscod
 	}
 
 	createDirectory(uri: vscode.Uri): void | Thenable<void> {
-		return _.mkdir(uri.fsPath);
+		return _.mkdir(uri.fsPath.toString());
+	}
+
+	openDirectory(uri: vscode.Uri): void | Thenable<void> {
+		return this._openDirectory(uri);
+		// return _.openDir(uri.fsPath);
+	}
+
+	async _openDirectory(uri: vscode.Uri): Promise<void> {
+		return _.openDir(uri.fsPath);
 	}
 
 	readFile(uri: vscode.Uri): Uint8Array | Thenable<Uint8Array> {
@@ -308,7 +306,8 @@ export class FileSystemProvider implements vscode.TreeDataProvider<Entry>, vscod
 			return children.map(([name, type]) => ({ uri: vscode.Uri.file(path.join(element.uri.fsPath, name)), type }));
 		}
 		//第一次的时候，打开既定的一个路径为workSpace
-        // const workspaceFolder = vscode.workspace.workspaceFolders?.filter(folder => folder.uri.scheme === 'file')[0];
+		// const workspaceFolder = vscode.workspace.workspaceFolders?.filter(folder => folder.uri.scheme === 'file')[0];
+
 		if (this._workSpacePath!=="explorer") {			
 			const workPath:vscode.Uri = vscode.Uri.parse(this._workSpacePath);
 			const children = await this.readDirectory(workPath);
@@ -337,26 +336,27 @@ export class FileSystemProvider implements vscode.TreeDataProvider<Entry>, vscod
 export class FileExplorer {
 	private fileExplorer?: vscode.TreeView<Entry>;
 	private configuredView:any;
-	private treeDataProvider?:FileSystemProvider;
+	public treeDataProvider:FileSystemProvider = new FileSystemProvider();
+	private fileWatcher: vscode.FileSystemWatcher | undefined;
 	constructor(context: vscode.ExtensionContext) {
 	}
 
 	public createTreeView(){
 		this.configuredView = vscode.workspace.getConfiguration().get('conf.replace.workSpacePath');
-		// const configuredView:any = "explorer";
-		this.treeDataProvider = new FileSystemProvider();
 		this.treeDataProvider.setWorkSpacePath(this.configuredView);
 		this.treeDataProvider.watch(vscode.Uri.parse(this.configuredView),{recursive: true, excludes: []} );
-
 		this.fileExplorer = vscode.window.createTreeView('fileExplorer', { treeDataProvider:this.treeDataProvider });
 	}
 
 	public getConfiguredView(){
 		return this.configuredView;
 	}
+	public getonDidChange(){
+		return this.fileWatcher;
+	}
 
 	public getOnDidChangeFile(){
-		return this.treeDataProvider?._onDidChangeFile.fire;
+		return this.treeDataProvider?.onDidChangeFile;
 	}
 
 	public refresh(){
@@ -365,5 +365,9 @@ export class FileExplorer {
 
 	public openResource(resource: vscode.Uri): void {
 		vscode.window.showTextDocument(resource);
+	}
+
+	public openFloder(resource: vscode.Uri): void {
+		vscode.commands.executeCommand('revealFileInOS', resource);
 	}
 }

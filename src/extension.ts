@@ -5,36 +5,37 @@ import {Entry} from './core/Entry';
 import MakeReplaceValue from './usercase/MakeReplaceValue';
 import ReplaceText from './usercase/ReplaceText';
 import { TextDecoder } from 'util';
+import * as fs from 'fs';
 
 export function activate(context: vscode.ExtensionContext) {
 	// console.log('Congratulations, your extension "templatereplace" is now active!');
 
 	const fileExplorer = new FileExplorer(context);
 	fileExplorer.createTreeView();
-	// vscode.commands.registerCommand('extension.helloWorld', (resource) => {
-	// 	vscode.window.showInformationMessage("helloWorld");
-	// });
-	// vscode.window.registerTreeDataProvider("");
-	// vscode.commands.registerCommand('fileExplorer', () => {
-	// 	fileExplorer.createTreeView();
-	// });
 
-	vscode.commands.registerCommand('fileExplorer.openFile', (resource) => {
+	context.subscriptions.push(vscode.commands.registerCommand('fileExplorer.openFile', (resource) => {
 		fileExplorer.openResource(resource);
-	});
+	}));
 
-	const fileSystemProvider = new FileSystemProvider();
-	vscode.commands.registerCommand('fileExplorer.refreshEntry', (resource) => {
-		// vscode.window.showInformationMessage("R");
-		fileExplorer.getOnDidChangeFile();
-		fileExplorer.refresh();
-	});
-	context.subscriptions.push(fileSystemProvider.onDidChangeFile(e=>{
-		vscode.window.showInformationMessage("R");
-	}))
-	// vscode.commands.registerCommand('fileExplorer.refreshEntry', (resource) => {
+	context.subscriptions.push(vscode.commands.registerCommand('fileExplorer.openFloder', (resource) => {
+		fileExplorer.openFloder(resource.uri);
+	}));
+
+	// const fileSystemProvider = new FileSystemProvider();
+	// context.subscriptions.push(vscode.commands.registerCommand('fileExplorer.refreshEntry', (resource) => {
 	// 	// vscode.window.showInformationMessage("R");
 	// 	fileExplorer.refresh();
+	// }));
+
+	context.subscriptions.push(vscode.workspace.onDidChangeConfiguration(e => {
+		if (e.affectsConfiguration('conf.replace.workSpacePath')) {
+			fileExplorer.createTreeView();
+		}
+	}));
+
+	// vscode.commands.registerCommand('fileExplorer.refreshEntry', (resource) => {
+	// 	// vscode.window.showInformationMessage("R");
+	// 	fileExplorer.refresh();f
 	// });
 	
 	// vscode.commands.registerCommand('fileExplorer.addEntry',
@@ -62,54 +63,53 @@ export function activate(context: vscode.ExtensionContext) {
 		  vscode.workspace.getConfiguration().update('conf.replace.workSpacePath', folderUris[0].path, vscode.ConfigurationTarget.Global);
 		});
 	  });
-
-	  context.subscriptions.push(vscode.workspace.onDidChangeConfiguration(e => {
-		if (e.affectsConfiguration('conf.replace.workSpacePath')) {
-			fileExplorer.createTreeView();
-		}
-	  }));
 	
-	//
 	let disposable = vscode.commands.registerCommand('fileExplorer.replace', async (node:Entry) => {
-    let editor = vscode.window.activeTextEditor;
-    if (!editor) {return null;}
-    const document = editor.document;
+		let editor = vscode.window.activeTextEditor;
+		if (!editor) {return null;}
+		const document = editor.document;
 
-    const documentName = document.fileName;
-    if(!documentName.match(/Untitled-[\d]+/g)){
-      vscode.window.showInformationMessage("不能在这个文件下执行替换。。。🤗️");
-      // let doc = await vscode.workspace.openTextDocument({ language: 'plaintext', content: testdoc });
-      // editor = await vscode.window.showTextDocument(doc);
-      return null;
-    }
+		const documentName = document.fileName;
+		if(!documentName.match(/Untitled-[\d]+/g)){
+		vscode.window.showInformationMessage("不能在这个文件下执行替换。。。🤗️");
+		// let doc = await vscode.workspace.openTextDocument({ language: 'plaintext', content: testdoc });
+		// editor = await vscode.window.showTextDocument(doc);
+		return null;
+		}
 
-    const selection = editor.selection;
-    const word = document.getText();
+		const selection = editor.selection;
+		const word = document.getText();
 
-    let firstLine = editor.document.lineAt(0);
-    let lastLine = editor.document.lineAt(editor.document.lineCount - 1);
-    let textRange = 
-      new vscode.Range(
-        0,
-        firstLine.range.start.character,
-        editor.document.lineCount-1,
-        lastLine.range.end.character);
+		let firstLine = editor.document.lineAt(0);
+		let lastLine = editor.document.lineAt(editor.document.lineCount - 1);
+		let textRange = 
+		new vscode.Range(
+			0,
+			firstLine.range.start.character,
+			editor.document.lineCount-1,
+			lastLine.range.end.character);
 
-    const testdoc = replaceTarStr(word,node);
+		const testdoc = replaceTarStr(word,node);
 
-    editor.edit(editBuilder=>{
-      editBuilder.replace(textRange,testdoc);
-    });
+		editor.edit(editBuilder=>{
+		editBuilder.replace(textRange,testdoc);
+		});
 	});
 	context.subscriptions.push(disposable);
 }
 
 export function replaceTarStr(word:any,node:Entry):string {
-	var temp = new MakeReplaceValue(word,node);
+    let opt:any={
+		encoding:'utf-8',
+	  };
+
+    var textValue = fs.readFileSync(node.uri.fsPath,opt).toString();
+	var temp = new MakeReplaceValue(word,textValue);
 	var rep = new ReplaceText();
-	rep.setData(temp.groupingVariable());
+	rep.setData(temp.getGroupValue());
 	rep.setIdentifier(temp.getIdentifier());
-	rep.setTextValue(temp.getTextValue());
+	rep.setTextValue(textValue);
+	rep.setTemplateGroup(temp.getTemplateGroup());
 	return rep.replace();
   }
 

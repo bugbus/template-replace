@@ -2,21 +2,31 @@ import * as fs from 'fs';
 import { workerData } from 'worker_threads';
 
 import{Entry} from '../core/Entry';
+import{LoopValue} from '../core/LoopValue'
 import{IdentifierSite} from '../core/IdentifierSite';
 
 class MakeReplaceValue{
   private identifierMaxRow:number = 1;
   private variableMaxRow:number = 1;
   private variable:Array<Array<string>> = new Array();
+  private templateGroup:Array<LoopValue> = new Array();
   private identifier:Array<IdentifierSite> = new Array();
   private textValue:string = "";
-
-  constructor(word:string,node:Entry){
-    this.readIdentifier(node);
-    this.readVariable(word);
+  private groupValue:[]
+  // constructor(word:string,node:Entry){
+  //   this.readIdentifier(node);
+  //   this.readVariable(word);
+  // }
+  constructor(inputValue:string,templateValue:string){
+    // this.textValue = textValue;
+    this.identifier = this.readTemplateFileForIdentifier(templateValue);
+    this.templateGroup = this.readTemplateFileForGroup(templateValue);
+    this.variable = this.readInputFile(inputValue);
+    this.groupValue = this.groupingVariable();
   }
 
   public getIdentifier():Array<IdentifierSite>{
+    // 模版文件中各种变量
     return this.identifier;
   }
 
@@ -24,29 +34,67 @@ class MakeReplaceValue{
     return this.textValue;
   }
 
-  private readIdentifier(node:Entry){
-    let opt:any={
-      encoding:'utf-8',
-    };
+  public getTemplateGroup(){
+    return this.templateGroup;
+  }
 
-    this.textValue = fs.readFileSync(node.uri.fsPath,opt).toString();
+  public getGroupValue(){
+    return this.groupValue;
+  }
 
-    var re = /(?:\{[r,c]\d+\}|\{r\d+c\d+\})/g;
-
-    let match:RegExpMatchArray | null = this.textValue.match(re);
-
+  public groupingVariable():any{
+    var replaceData=[];
+    var groupingNum = this.identifierMaxRow===0?(this.variableMaxRow/this.identifierMaxRow):1;
+    for(var i=0;i<this.variableMaxRow; i+=this.identifierMaxRow){
+      replaceData.push(this.variable.slice(i,i+this.identifierMaxRow));
+    }
+    return replaceData;
+  }
+  // 读取模版文件，
+  // private readIdentifier(){
+  private readTemplateFileForIdentifier(templateValue:string):Array<IdentifierSite>{
+    var identifier:Array<IdentifierSite> = new Array();
+    var match = this.hasLoopReplace(templateValue);
     if(match){
       match.forEach((value)=>{
         var row = this.getIdentifierRow(this.fmtIdentifier(value));
         var clo = this.getIdentifierCol(this.fmtIdentifier(value));
         if(this.identifierMaxRow<row){this.identifierMaxRow = row;}
-        this.identifier.push({
+        identifier.push({
           x:row-1,
           y:clo-1,
+          type: 'templateValue',
           value:this.fmtIdentifier(value)
         });
       });
     }
+    return identifier;
+  }
+  private hasLoopReplace(value:string):RegExpMatchArray | null{
+    var re = /(?:\{[r,c]\d+\}|\{r\d+c\d+\})/g;
+    let match:RegExpMatchArray | null = value.match(re);
+    return match;
+  }
+
+  private readTemplateFileForGroup(templateValue:string):Array<LoopValue>{
+    var loopValue:Array<LoopValue> = new Array();
+    // var re = /(?:\{\.\.\.\}?:\r|\n|\r\n|\n\r)/g;
+    // var re = /(?:\{\.\.\.\}(?:\r|\n|\r\n|\n\r))/g    //  从开头开始有多个空格，包含{...},连带会车符号。
+    var re = / *(?:\{\.\.\.\}\n)/g//多个空格后加上{...}和会车符
+
+    let match:RegExpMatchArray | null = templateValue.match(re);
+    if(match){
+      templateValue.split(re).forEach(value=>{
+        if(this.hasLoopReplace(value)){
+          loopValue.push({isLoop:true,value:value});
+        }else{
+          loopValue.push({isLoop:false,value:value});
+        }
+      });
+    }else{
+      loopValue.push({isLoop:false,value:templateValue});
+    }
+    return loopValue;
   }
 
   private getIdentifierRow(value:string):number{
@@ -57,7 +105,7 @@ class MakeReplaceValue{
     return parseInt(value.substring(value.search('c')+1,value.search('}')+1));
   }
 
-  private fmtIdentifier(value:string):string{
+  fmtIdentifier(value:string):string{
     if(value.search(/\{r\d+\}/g)>0){
       return value.replace("\}","c1}");
     }else if(value.search(/\{c\d+\}/g)>0){
@@ -67,7 +115,10 @@ class MakeReplaceValue{
     }
   }
 
-  private readVariable(word:string){
+  //读取输入文件，按照会车和制表符转换为二维数组
+  // readVariable(word:string){
+  readInputFile(word:string):Array<Array<string>>{
+    var variable:Array<Array<string>> = new Array()
     const rCol = /(?:\r|\n|\r\n|\n\r)/g;
     word.split(rCol).forEach((str)=>{
       if(str===""){return;}
@@ -77,18 +128,10 @@ class MakeReplaceValue{
         if(varitem===""){return;}
         vartemp.push(varitem);
       });
-      this.variable.push(vartemp);
+      variable.push(vartemp);
     });
-    this.variableMaxRow = this.variable.length;
-  }
-
-  public groupingVariable():any{
-    var replaceData=[];
-    var groupingNum = this.identifierMaxRow===0?(this.variableMaxRow/this.identifierMaxRow):1;
-    for(var i=0;i<this.variableMaxRow; i+=this.identifierMaxRow){
-      replaceData.push(this.variable.slice(i,i+this.identifierMaxRow));
-    }
-    return replaceData;
+    this.variableMaxRow = variable.length;
+    return variable;
   }
 }
 
