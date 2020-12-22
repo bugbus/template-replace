@@ -80,7 +80,7 @@ class MakeReplaceValue{
     var loopValue:Array<LoopValue> = new Array();
     // var re = /(?:\{\.\.\.\}?:\r|\n|\r\n|\n\r)/g;
     // var re = /(?:\{\.\.\.\}(?:\r|\n|\r\n|\n\r))/g    //  从开头开始有多个空格，包含{...},连带会车符号。
-    var re = / *(?:\{\.\.\.\}\n)/g//多个空格后加上{...}和会车符
+    var re = / *(?:{...})(?:\r|\n|\r\n|\n\r)/g;//多个空格后加上{...}和会车符
 
     let match:RegExpMatchArray | null = templateValue.match(re);
     if(match){
