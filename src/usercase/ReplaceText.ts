@@ -44,7 +44,14 @@ class ReplaceText{
                     retTextValue+='\n';
                 });
             }else{
-                retTextValue+=value.value;
+                var repTextValue:string = value.value;
+    
+                this.identifier.forEach((item)=>{
+                    repTextValue = repTextValue.replace(item.value,this.data[item.x][item.y]);
+                });
+    
+                retTextValue+=repTextValue;
+                retTextValue+='\n';
             }
             retAllText+=retTextValue;
         });

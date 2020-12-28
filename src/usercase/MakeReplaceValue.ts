@@ -92,7 +92,7 @@ class MakeReplaceValue{
         }
       });
     }else{
-      loopValue.push({isLoop:false,value:templateValue});
+      loopValue.push({isLoop:true,value:templateValue});
     }
     return loopValue;
   }
